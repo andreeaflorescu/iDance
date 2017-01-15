@@ -1,0 +1,3 @@
+[submodule "modules/genreXpose"]
+	path = modules/genreXpose
+	url = git@github.com:andreeaflorescu/genreXpose.git
