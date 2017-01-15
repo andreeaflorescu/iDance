@@ -1,3 +1,4 @@
+import peakutils
 from scipy.fftpack import fft
 from scipy.io import wavfile # get the api
 from string import rsplit, split
@@ -11,7 +12,6 @@ class Song(object):
     def get_fourier_transform(self):
         pass
 
-
 class WAVSong(Song):
 
     def __init__(self, song_path):
@@ -19,6 +19,11 @@ class WAVSong(Song):
         self.channel_type = self.get_channel_type()
         self.bit_format = self.get_bit_format()
         self.track = self.get_track()
+        self.fourier_t = None
+        self.song_path = song_path
+
+    def get_rate(self):
+        return self.rate
 
     # a song can be stereo or mono
     # when the song is stereo, it has two arrays T
@@ -47,11 +52,13 @@ class WAVSong(Song):
 
     def get_nr_of_tracks(self):
         if self.channel_type == Channel.TYPE.MONO:
-            return 0
-        else:
             return 1
+        else:
+            return 2
 
     def get_track(self):
+        print "data len=",len(self.data.T)
+        print "rate=", self.rate
         if self.channel_type == Channel.TYPE.MONO:
             return self.data.T
         else:
@@ -60,7 +67,41 @@ class WAVSong(Song):
     def get_fourier_transform(self):
         normalized_track = [(element / 2 ** float(self.bit_format)) * 2 - 1 for element in self.track]
         fourier_t = fft(normalized_track)
+        self.fourier_t = fourier_t
         return fourier_t
+
+    def get_chunks_size(self):
+        chunks = []
+        # chunk_size = 0
+        start_index = 0
+        # end_index = 0
+        # musical phrases should be at least 7 seconds
+        index_of_4_seconds = self.index_to_seconds(0, 4)
+        indexes = peakutils.indexes(self.fourier_t, min_dist=index_of_4_seconds)
+        # verify that the first chunk has more than 7 seconds or else exclude it
+        if indexes[0] < index_of_4_seconds:
+            indexes = indexes[1:]
+
+        for i in indexes:
+            chunk_size = i/(self.rate*self.get_nr_of_tracks())
+            chunks.append(chunk_size)
+
+        return chunks
+
+    '''
+    Returns the index of the fourier_transform element which is
+    nr of seconds grater than the start element
+    start = index in fourier_t
+    seconds = number of seconds
+    '''
+
+    def index_to_seconds(self, start, seconds):
+        # rate is the number of samples per seconds
+        return start + self.rate * seconds
+
+    def split_in_musical_phrases(self):
+        splitter = WAVSongSplitter(self.song_path, "new")
+        splitter.split_song_in_chunks(self.get_chunks_size())
 
 
 class WAVSongSplitter(object):
