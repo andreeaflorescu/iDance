@@ -66,7 +66,6 @@ class WAVSong(Song):
 class WAVSongSplitter(object):
     def __init__(self, song_path, results_dir=""):
         self.song = AudioSegment.from_wav(song_path)
-        # s = song_path.rsplit("/", 1)
         self.song_name = song_path.rsplit("/", 1)[1]
         print "song name: ", self.song_name
         if results_dir:
@@ -74,7 +73,6 @@ class WAVSongSplitter(object):
         else:
             self.results_dir = song_path.rsplit("/", 1)[0]
 
-        # print self.results_dir, self.song_name
         print "results directory: ", self.results_dir
 
     # chunk is in seconds
