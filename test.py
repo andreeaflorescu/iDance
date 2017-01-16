@@ -27,7 +27,9 @@ fourier_t = song.get_fourier_transform()
 song.split_in_musical_phrases()
 d = len(fourier_t)/2
 plt.plot(fourier_t[:(d -1)], 'r')
-
+plt.xlim(xmin=0, xmax=d)
+plt.ylim(ymin=-5000, ymax=5000)
+plt.savefig(song.get_song_name() + ".png")
 # plt.plot(fourier_t[indexes], 'bo')
 # plt.show()
 # s_splitter = WAVSongSplitter(sys.argv[1], "chunks")
