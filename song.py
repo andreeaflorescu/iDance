@@ -2,6 +2,7 @@ import peakutils
 from scipy.fftpack import fft
 from scipy.io import wavfile # get the api
 from string import rsplit, split
+import numpy as np
 
 from pydub import AudioSegment
 
@@ -21,9 +22,17 @@ class WAVSong(Song):
         self.track = self.get_track()
         self.fourier_t = None
         self.song_path = song_path
+        s = song_path.rsplit("/", 1)
+        if len(s) == 1:
+            self.song_name = s[0]
+        else:
+            self.song_name = s[1]
 
     def get_rate(self):
         return self.rate
+
+    def get_song_name(self):
+        return self.song_name
 
     # a song can be stereo or mono
     # when the song is stereo, it has two arrays T
@@ -75,11 +84,18 @@ class WAVSong(Song):
         # chunk_size = 0
         start_index = 0
         # end_index = 0
-        # musical phrases should be at least 7 seconds
-        index_of_4_seconds = self.index_to_seconds(0, 4)
-        indexes = peakutils.indexes(self.fourier_t, min_dist=index_of_4_seconds)
-        # verify that the first chunk has more than 7 seconds or else exclude it
-        if indexes[0] < index_of_4_seconds:
+        # musical phrases should be at least 4 seconds
+        min_dist = self.index_to_seconds(0, 1)
+        # print len(np.absolute(self.fourier_t))
+        length = len(self.fourier_t)
+        values = self.fourier_t[:length/2]
+        print "leng=", len(values)
+        indexes = peakutils.indexes(values, min_dist=min_dist)
+        print len(indexes)
+        if self.channel_type == Channel.TYPE.STEREO:
+            indexes = indexes[:len(indexes)/2 - 1]
+        # verify that the first chunk has more than 4 seconds or else exclude it
+        if indexes[0] < min_dist:
             indexes = indexes[1:]
 
         for i in indexes:
