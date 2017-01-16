@@ -3,6 +3,7 @@ from scipy.fftpack import fft
 from scipy.io import wavfile # get the api
 from string import rsplit, split
 import numpy as np
+import matplotlib.pyplot as plt
 
 from pydub import AudioSegment
 
@@ -56,7 +57,7 @@ class WAVSong(Song):
             bits = int(bits)
         else:
             bits = int(bits[1])
-        print "bits=", bits
+        print "bits:              ", bits
         return bits
 
     def get_nr_of_tracks(self):
@@ -66,8 +67,7 @@ class WAVSong(Song):
             return 2
 
     def get_track(self):
-        print "data len=",len(self.data.T)
-        print "rate=", self.rate
+        print "frames/second:     ", self.rate
         if self.channel_type == Channel.TYPE.MONO:
             return self.data.T
         else:
@@ -85,13 +85,10 @@ class WAVSong(Song):
         start_index = 0
         # end_index = 0
         # musical phrases should be at least 4 seconds
-        min_dist = self.index_to_seconds(0, 1)
-        # print len(np.absolute(self.fourier_t))
+        min_dist = self.index_to_seconds(0, 4)
         length = len(self.fourier_t)
         values = self.fourier_t[:length/2]
-        print "leng=", len(values)
         indexes = peakutils.indexes(values, min_dist=min_dist)
-        print len(indexes)
         if self.channel_type == Channel.TYPE.STEREO:
             indexes = indexes[:len(indexes)/2 - 1]
         # verify that the first chunk has more than 4 seconds or else exclude it
@@ -116,9 +113,17 @@ class WAVSong(Song):
         return start + self.rate * seconds
 
     def split_in_musical_phrases(self):
-        splitter = WAVSongSplitter(self.song_path, "new")
+        splitter = WAVSongSplitter(self.song_path, "song_details")
         splitter.split_song_in_chunks(self.get_chunks_size())
 
+    def plot_frequencies(self):
+		self.fourier_t = self.get_fourier_transform()
+		d = len(self.fourier_t)/2
+		plt.plot(self.fourier_t[:(d -1)], 'r')
+		plt.xlim(xmin=0, xmax=d)
+		plt.ylim(ymin=-5000, ymax=5000)
+		plt.savefig(self.get_song_name() + ".png")
+		
 
 class WAVSongSplitter(object):
     def __init__(self, song_path, results_dir=""):
@@ -131,7 +136,6 @@ class WAVSongSplitter(object):
             self.song_name = s[1]
             self.results_dir = s[0]
 
-        print "song name: ", self.song_name
         if results_dir:
             self.results_dir = results_dir
 
