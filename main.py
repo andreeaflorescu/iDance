@@ -1,5 +1,3 @@
-import scipy
-import peakutils
 import sys
 from song import Song, WAVSong, WAVSongSplitter
 sys.path.insert(0, 'modules/genreXpose/genreXpose')
