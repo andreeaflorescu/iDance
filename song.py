@@ -122,7 +122,7 @@ class WAVSong(Song):
 		plt.plot(self.fourier_t[:(d -1)], 'r')
 		plt.xlim(xmin=0, xmax=d)
 		plt.ylim(ymin=-5000, ymax=5000)
-		plt.savefig(self.get_song_name() + ".png")
+		plt.savefig("song_details/" + self.get_song_name() + ".png")
 		
 
 class WAVSongSplitter(object):
