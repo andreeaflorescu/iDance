@@ -1,3 +1,6 @@
-[submodule "modules/genreXpose"]
-	path = modules/genreXpose
-	url = git@github.com:andreeaflorescu/genreXpose.git
+[submodule "modules/genre-recognition"]
+	path = modules/genre-recognition
+	url = git@github.com:andreeaflorescu/DeepAudioClassification.git
+[submodule "modules/dance-choreography-cnn"]
+	path = modules/dance-choreography-cnn
+	url = https://github.com/andreeaflorescu/dance-choreography-cnn
