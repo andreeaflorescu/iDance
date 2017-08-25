@@ -2,7 +2,7 @@ import boto3
 import os
 
 from sqs_utils import download_song, get_bucket_and_key, polling, delete_song_from_s3
-from config import create_choreography_sqs
+from config import create_choreography_sqs, input_sliced_songs_bucket
 
 s3 = boto3.client('s3')
 
@@ -17,7 +17,7 @@ def upload_fragments(fragment_dir):
     for fragment in os.listdir(fragment_dir):
         fragment_path = fragment_dir + "/" + fragment
         print("Upload fragment: ", fragment_path)
-        s3.upload_file(fragment_path, "idance.input.slices", fragment)
+        s3.upload_file(fragment_path, input_sliced_songs_bucket, fragment)
         # delete file
         os.remove(fragment_path)
 
